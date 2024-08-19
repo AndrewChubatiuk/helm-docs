@@ -250,7 +250,7 @@ func getValuesTableTemplates() string {
 	// For HTML tables
 	valuesSectionBuilder.WriteString(`
 {{ define "chart.valueDefaultColumnRender" }}
-{{- $defaultValue := (default .Default .AutoDefault)  -}}
+{{- $defaultValue := (default .Default .AutoDefault) -}}
 {{- $notationType := .NotationType }}
 {{- if (and (hasPrefix "` + "`" + `" $defaultValue) (hasSuffix "` + "`" + `" $defaultValue) ) -}}
 {{- $defaultValue = (toPrettyJson (fromJson (trimAll "` + "`" + `" (default .Default .AutoDefault) ) ) ) -}}
@@ -266,10 +266,24 @@ func getValuesTableTemplates() string {
 </pre>
 {{ end }}
 
+{{ define "chart.valueDescriptionColumnRender" -}}
+{{- default .AutoDescription .Description | toHTML -}}
+{{- end }}
+
 {{ define "chart.valuesTableHtml" }}
-{{ if .Sections.Sections }}
-{{- range .Sections.Sections }}
-<h3>{{- .SectionName }}</h3>
+{{- $sections := default list }}
+{{- if .Sections.Sections -}}
+  {{- $sections = concat $sections .Sections.Sections -}}
+  {{- if .Sections.DefaultSection.SectionItems -}}
+    {{- $sections = append $sections .Sections.DefaultSection -}}
+  {{- end }}
+{{- else }}
+  {{- $sections = append $sections (dict "SectionItems" .Values) -}}
+{{- end }}
+{{- range $sections }}
+{{- with .SectionName}}
+<h3>{{- . }}</h3>
+{{- end }}
 <table>
 	<thead>
 		<th>Key</th>
@@ -283,53 +297,12 @@ func getValuesTableTemplates() string {
 			<td>{{ .Key }}</td>
 			<td>{{ .Type }}</td>
 			<td>{{ template "chart.valueDefaultColumnRender" . }}</td>
-			<td>{{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }}</td>
+			<td>{{ template "chart.valueDescriptionColumnRender" . }}</td>
 		</tr>
 	{{- end }}
 	</tbody>
 </table>
 {{- end }}
-{{ if .Sections.DefaultSection.SectionItems }}
-<h3>{{- .Sections.DefaultSection.SectionName }}</h3>
-<table>
-	<thead>
-		<th>Key</th>
-		<th>Type</th>
-		<th>Default</th>
-		<th>Description</th>
-	</thead>
-	<tbody>
-	{{- range .Sections.DefaultSection.SectionItems }}
-	<tr>
-		<td>{{ .Key }}</td>
-		<td>{{ .Type }}</td>
-		<td>{{ template "chart.valueDefaultColumnRender" . }}</td>
-		<td>{{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }}</td>
-	</tr>
-	{{- end }}
-	</tbody>
-</table>
-{{ end }}
-{{ else }}
-<table>
-	<thead>
-		<th>Key</th>
-		<th>Type</th>
-		<th>Default</th>
-		<th>Description</th>
-	</thead>
-	<tbody>
-	{{- range .Values }}
-		<tr>
-			<td>{{ .Key }}</td>
-			<td>{{ .Type }}</td>
-			<td>{{ template "chart.valueDefaultColumnRender" . }}</td>
-			<td>{{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }}</td>
-		</tr>
-	{{- end }}
-	</tbody>
-</table>
-{{ end }}
 {{ end }}
 
 {{ define "chart.valuesSectionHtml" }}
