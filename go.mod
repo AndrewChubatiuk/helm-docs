@@ -6,6 +6,7 @@ require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/alecthomas/chroma/v2 v2.24.1
 	github.com/gobwas/glob v0.2.3
+	github.com/gomarkdown/markdown v0.0.0-20260417124207-7d523f7318df
 	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.16.0
